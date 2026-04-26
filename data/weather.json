@@ -1,0 +1,14 @@
+{
+  "city": "Ошибка данных",
+  "current": {
+    "main": {
+      "temp": 0
+    },
+    "weather": [
+      {
+        "description": "нет связи с API"
+      }
+    ]
+  },
+  "daily": []
+}
