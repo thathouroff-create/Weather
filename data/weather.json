@@ -1,14 +1,233 @@
 {
-  "city": "Ошибка данных",
+  "city": "Москва",
   "current": {
+    "dt": 1777237200,
     "main": {
-      "temp": 0
+      "temp": 1.01,
+      "feels_like": -4.59,
+      "temp_min": 1.01,
+      "temp_max": 2.24,
+      "pressure": 990,
+      "sea_level": 990,
+      "grnd_level": 970,
+      "humidity": 93,
+      "temp_kf": -1.23
     },
     "weather": [
       {
-        "description": "нет связи с API"
+        "id": 500,
+        "main": "Rain",
+        "description": "небольшой дождь",
+        "icon": "10n"
       }
-    ]
+    ],
+    "clouds": {
+      "all": 100
+    },
+    "wind": {
+      "speed": 6.94,
+      "deg": 314,
+      "gust": 13.55
+    },
+    "visibility": 1976,
+    "pop": 1,
+    "rain": {
+      "3h": 2.95
+    },
+    "sys": {
+      "pod": "n"
+    },
+    "dt_txt": "2026-04-26 21:00:00"
   },
-  "daily": []
+  "daily": [
+    {
+      "dt": 1777237200,
+      "main": {
+        "temp": 1.01,
+        "feels_like": -4.59,
+        "temp_min": 1.01,
+        "temp_max": 2.24,
+        "pressure": 990,
+        "sea_level": 990,
+        "grnd_level": 970,
+        "humidity": 93,
+        "temp_kf": -1.23
+      },
+      "weather": [
+        {
+          "id": 500,
+          "main": "Rain",
+          "description": "небольшой дождь",
+          "icon": "10n"
+        }
+      ],
+      "clouds": {
+        "all": 100
+      },
+      "wind": {
+        "speed": 6.94,
+        "deg": 314,
+        "gust": 13.55
+      },
+      "visibility": 1976,
+      "pop": 1,
+      "rain": {
+        "3h": 2.95
+      },
+      "sys": {
+        "pod": "n"
+      },
+      "dt_txt": "2026-04-26 21:00:00"
+    },
+    {
+      "dt": 1777323600,
+      "main": {
+        "temp": 0.5,
+        "feels_like": -6.23,
+        "temp_min": 0.5,
+        "temp_max": 0.5,
+        "pressure": 994,
+        "sea_level": 994,
+        "grnd_level": 974,
+        "humidity": 94,
+        "temp_kf": 0
+      },
+      "weather": [
+        {
+          "id": 601,
+          "main": "Snow",
+          "description": "снег",
+          "icon": "13n"
+        }
+      ],
+      "clouds": {
+        "all": 100
+      },
+      "wind": {
+        "speed": 9.55,
+        "deg": 278,
+        "gust": 19.34
+      },
+      "visibility": 2283,
+      "pop": 1,
+      "snow": {
+        "3h": 1.64
+      },
+      "sys": {
+        "pod": "n"
+      },
+      "dt_txt": "2026-04-27 21:00:00"
+    },
+    {
+      "dt": 1777410000,
+      "main": {
+        "temp": 1.05,
+        "feels_like": -3.32,
+        "temp_min": 1.05,
+        "temp_max": 1.05,
+        "pressure": 1006,
+        "sea_level": 1006,
+        "grnd_level": 986,
+        "humidity": 96,
+        "temp_kf": 0
+      },
+      "weather": [
+        {
+          "id": 600,
+          "main": "Snow",
+          "description": "небольшой снег",
+          "icon": "13n"
+        }
+      ],
+      "clouds": {
+        "all": 100
+      },
+      "wind": {
+        "speed": 4.52,
+        "deg": 271,
+        "gust": 10.53
+      },
+      "visibility": 43,
+      "pop": 1,
+      "snow": {
+        "3h": 1
+      },
+      "sys": {
+        "pod": "n"
+      },
+      "dt_txt": "2026-04-28 21:00:00"
+    },
+    {
+      "dt": 1777496400,
+      "main": {
+        "temp": 0.33,
+        "feels_like": -2.78,
+        "temp_min": 0.33,
+        "temp_max": 0.33,
+        "pressure": 1021,
+        "sea_level": 1021,
+        "grnd_level": 1001,
+        "humidity": 84,
+        "temp_kf": 0
+      },
+      "weather": [
+        {
+          "id": 801,
+          "main": "Clouds",
+          "description": "небольшая облачность",
+          "icon": "02n"
+        }
+      ],
+      "clouds": {
+        "all": 14
+      },
+      "wind": {
+        "speed": 2.65,
+        "deg": 309,
+        "gust": 7.03
+      },
+      "visibility": 10000,
+      "pop": 0,
+      "sys": {
+        "pod": "n"
+      },
+      "dt_txt": "2026-04-29 21:00:00"
+    },
+    {
+      "dt": 1777582800,
+      "main": {
+        "temp": 3.12,
+        "feels_like": 0.66,
+        "temp_min": 3.12,
+        "temp_max": 3.12,
+        "pressure": 1021,
+        "sea_level": 1021,
+        "grnd_level": 1001,
+        "humidity": 73,
+        "temp_kf": 0
+      },
+      "weather": [
+        {
+          "id": 803,
+          "main": "Clouds",
+          "description": "облачно с прояснениями",
+          "icon": "04n"
+        }
+      ],
+      "clouds": {
+        "all": 70
+      },
+      "wind": {
+        "speed": 2.51,
+        "deg": 253,
+        "gust": 5.5
+      },
+      "visibility": 10000,
+      "pop": 0,
+      "sys": {
+        "pod": "n"
+      },
+      "dt_txt": "2026-04-30 21:00:00"
+    }
+  ]
 }
