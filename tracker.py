@@ -5,7 +5,7 @@ import os
 print(">>> СТАРТ: Погодный радар")
 
 # Используй этот ключ (он проверен)
-API_KEY = "bd5e378503939dec9256323a75109223"
+API_KEY = "604b73696fe82cfda93d7d8278c9faff"
 CITY = "Moscow"
 
 def get_weather():
