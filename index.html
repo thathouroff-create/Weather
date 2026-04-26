@@ -3,45 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Radar Pro</title>
+    <title>SkyCast Pro 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .map-tiles { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
     </style>
 </head>
-<body class="bg-[#0f172a] text-white min-h-screen">
-    <div class="container mx-auto p-4 max-w-5xl">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="lg:col-span-2 bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-[2rem] shadow-2xl flex justify-between items-center relative overflow-hidden">
-                <div class="relative z-10">
-                    <h1 id="city-name" class="text-5xl font-black mb-2">Загрузка...</h1>
-                    <p id="current-desc" class="text-blue-100 text-xl capitalize"></p>
+<body class="text-slate-200 pb-12">
+    <div class="container mx-auto p-4 max-w-6xl">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 mt-6">
+            <div class="lg:col-span-8 glass p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
+                <div class="z-10 text-center md:text-left">
+                    <h1 id="city-name" class="text-6xl font-extrabold tracking-tighter text-white mb-2">Загрузка...</h1>
+                    <p id="current-desc" class="text-blue-400 text-2xl font-medium capitalize"></p>
+                    <div class="mt-6 flex gap-4 justify-center md:justify-start">
+                        <span class="bg-blue-500/20 text-blue-300 px-4 py-1 rounded-full text-sm border border-blue-500/30">2026 Edition</span>
+                        <span id="update-time" class="bg-slate-700/50 text-slate-400 px-4 py-1 rounded-full text-sm">--:--</span>
+                    </div>
                 </div>
-                <div class="relative z-10 text-right">
-                    <div id="current-temp" class="text-7xl font-black">--°</div>
+                <div class="z-10 text-center mt-8 md:mt-0">
+                    <div id="current-temp" class="text-9xl font-black text-white leading-none">--°</div>
+                    <p class="text-slate-400 mt-2 text-lg">Ощущается как <span id="feels-like">--</span>°</p>
                 </div>
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-600/20 rounded-full blur-[100px]"></div>
             </div>
 
-            <div class="bg-slate-800/50 p-8 rounded-[2rem] border border-slate-700 flex flex-col justify-center">
-                <div class="mb-4">
-                    <span class="text-slate-400 block text-sm uppercase font-bold tracking-wider">Влажность</span>
-                    <span id="humidity" class="text-3xl font-bold">-- %</span>
+            <div class="lg:col-span-4 grid grid-cols-2 gap-4">
+                <div class="glass p-6 rounded-3xl flex flex-col justify-center items-center">
+                    <span class="text-slate-500 text-xs font-bold uppercase mb-2">Ветер</span>
+                    <span id="wind" class="text-2xl font-bold">--</span>
+                    <span class="text-slate-500 text-xs">м/с</span>
                 </div>
-                <div>
-                    <span class="text-slate-400 block text-sm uppercase font-bold tracking-wider">Ветер</span>
-                    <span id="wind" class="text-3xl font-bold">-- м/с</span>
+                <div class="glass p-6 rounded-3xl flex flex-col justify-center items-center">
+                    <span class="text-slate-500 text-xs font-bold uppercase mb-2">Влажность</span>
+                    <span id="humidity" class="text-2xl font-bold">--</span>
+                    <span class="text-slate-500 text-xs">%</span>
+                </div>
+                <div class="glass p-6 rounded-3xl flex flex-col justify-center items-center">
+                    <span class="text-slate-500 text-xs font-bold uppercase mb-2">Давление</span>
+                    <span id="pressure" class="text-xl font-bold">--</span>
+                    <span class="text-slate-500 text-xs">мм рт.ст.</span>
+                </div>
+                <div class="glass p-6 rounded-3xl flex flex-col justify-center items-center">
+                    <span class="text-slate-500 text-xs font-bold uppercase mb-2">Видимость</span>
+                    <span id="visibility" class="text-xl font-bold">--</span>
+                    <span class="text-slate-500 text-xs">км</span>
                 </div>
             </div>
         </div>
 
-        <div id="map" class="h-[400px] rounded-[2rem] mb-8 border border-slate-700 shadow-inner z-0"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="glass p-8 rounded-[2.5rem]">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full"></span> Тренд температуры
+                </h2>
+                <canvas id="tempChart" height="200"></canvas>
+            </div>
+            <div id="map" class="h-full min-h-[350px] rounded-[2.5rem] border border-white/5 z-0"></div>
+        </div>
 
-        <h2 class="text-2xl font-black mb-6 px-4">Прогноз на 5 дней</h2>
-        <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+        <h2 class="text-2xl font-bold mb-6 px-4">Прогноз на 5 дней</h2>
+        <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            </div>
     </div>
 
     <script>
@@ -50,48 +80,76 @@
                 const res = await fetch('data/weather.json');
                 const data = await res.json();
                 
-                // Обновление UI
+                // 1. Основные данные
                 document.getElementById('city-name').innerText = data.city;
                 document.getElementById('current-temp').innerText = `${Math.round(data.current.main.temp)}°`;
                 document.getElementById('current-desc').innerText = data.current.weather[0].description;
-                document.getElementById('humidity').innerText = `${data.current.main.humidity} %`;
-                document.getElementById('wind').innerText = `${data.current.wind.speed} м/с`;
+                document.getElementById('feels-like').innerText = Math.round(data.current.main.feels_like);
+                document.getElementById('update-time').innerText = data.current.dt_txt.split(' ')[1].substring(0, 5);
+                
+                // 2. Параметры (Перевод давления hPa -> mmHg: * 0.75006)
+                document.getElementById('wind').innerText = data.current.wind.speed;
+                document.getElementById('humidity').innerText = data.current.main.humidity;
+                document.getElementById('pressure').innerText = Math.round(data.current.main.pressure * 0.75006);
+                document.getElementById('visibility').innerText = (data.current.visibility / 1000).toFixed(1);
 
+                // 3. Построение графика
+                const ctx = document.getElementById('tempChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.daily.map(d => new Date(d.dt * 1000).toLocaleDateString('ru', {weekday: 'short'})),
+                        datasets: [{
+                            label: 'Температура (°C)',
+                            data: data.daily.map(d => d.main.temp),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 4,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#3b82f6'
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                            x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                        }
+                    }
+                });
+
+                // 4. Карточки прогноза
                 const grid = document.getElementById('forecast-grid');
                 grid.innerHTML = data.daily.map(day => `
-                    <div class="bg-slate-800/40 p-6 rounded-3xl border border-slate-700 text-center hover:bg-slate-800 transition-colors">
-                        <div class="text-slate-400 text-xs font-bold mb-2 uppercase">
+                    <div class="glass p-6 rounded-3xl text-center hover:scale-105 transition-transform duration-300">
+                        <div class="text-slate-500 text-xs font-bold uppercase mb-2">
                             ${new Date(day.dt * 1000).toLocaleDateString('ru', {weekday: 'short', day: 'numeric'})}
                         </div>
-                        <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-16 h-16">
-                        <div class="text-2xl font-black">${Math.round(day.main.temp)}°</div>
+                        <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-16">
+                        <div class="text-3xl font-black text-white">${Math.round(day.main.temp)}°</div>
+                        <div class="text-slate-400 text-xs mt-1 capitalize">${day.weather[0].description}</div>
                     </div>
                 `).join('');
 
-                // Работа с картой и геолокацией
+                // 5. Карта
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(pos => {
                         const { latitude, longitude } = pos.coords;
-                        const map = L.map('map', { zoomControl: false }).setView([latitude, longitude], 11);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            className: 'map-tiles'
-                        }).addTo(map);
-                        L.marker([latitude, longitude]).addTo(map).bindPopup('Вы здесь').openPopup();
+                        const map = L.map('map', { zoomControl: false }).setView([latitude, longitude], 12);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
+                        L.circle([latitude, longitude], { color: '#3b82f6', fillOpacity: 0.2, radius: 500 }).addTo(map);
                     }, () => {
-                        // Если доступ запрещен, показываем город из прогноза
-                        const map = L.map('map').setView([55.75, 37.61], 10);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                        const map = L.map('map', { zoomControl: false }).setView([55.75, 37.61], 10);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
                     });
                 }
             } catch (e) {
-                console.error("Данные не загружены");
+                console.error("Ошибка UI:", e);
             }
         }
         init();
     </script>
-    <style>
-        /* Стилизация карты под темную тему */
-        .map-tiles { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
-    </style>
 </body>
 </html>
