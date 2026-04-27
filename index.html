@@ -18,12 +18,10 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         #aqi-details { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; opacity: 0; }
         #aqi-details.open { grid-template-rows: 1fr; opacity: 1; margin-top: 1.5rem; }
-        #map { cursor: crosshair; }
     </style>
 </head>
 <body class="pb-12">
     <div class="container mx-auto p-4 max-w-6xl">
-        
         <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 mt-6">
             <h1 class="text-4xl font-black text-white tracking-tighter uppercase italic">
                 <span class="text-blue-400">Sky</span>Cast
@@ -33,47 +31,36 @@
                     <input type="text" id="city-input" placeholder="Город..." class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-3 px-5 focus:outline-none focus:border-blue-500 text-white">
                     <button onclick="searchCity()" class="absolute right-2 top-2 bg-blue-600 p-2 rounded-xl text-white">🔍</button>
                 </div>
-                <button onclick="getLocation()" class="bg-slate-800 border border-slate-700 px-5 py-3 rounded-2xl text-sm font-bold text-white hover:bg-slate-700 transition-all active:scale-95">📍 Мое место</button>
+                <button onclick="getLocation()" class="bg-slate-800 border border-slate-700 px-5 py-3 rounded-2xl text-sm font-bold text-white hover:bg-slate-700 transition-all active:scale-95">📍 Местоположение</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-            <div class="lg:col-span-8 glass p-6 sm:p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 text-white">
+            <div class="lg:col-span-8 glass p-6 sm:p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl transition-all">
                 <div class="flex flex-col md:flex-row justify-between items-center relative z-10">
                     <div class="text-center md:text-left w-full md:max-w-[65%]">
-                        <h2 id="city-name" class="text-4xl sm:text-6xl font-extrabold tracking-tighter text-white mb-2 break-words leading-tight">Загрузка...</h2>
+                        <h2 id="city-name" class="text-4xl sm:text-6xl font-extrabold tracking-tighter mb-2 break-words leading-tight">Загрузка...</h2>
                         <p id="current-desc" class="text-blue-400 text-xl md:text-2xl font-medium capitalize mb-6"></p>
                         
-                        <div class="flex flex-col gap-3">
-                            <div class="flex flex-wrap gap-3 justify-center md:justify-start">
-                                <div onclick="toggleAQI()" id="aqi-card" class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5 cursor-pointer hover:bg-slate-800 transition-all active:scale-95 hidden group">
-                                    <span class="text-slate-500 text-[10px] block uppercase font-black mb-1 group-hover:text-blue-400">Воздух (AQI) ▾</span>
-                                    <div class="flex items-center gap-2">
-                                        <span id="aqi-val" class="font-bold text-lg text-white">--</span>
-                                        <span id="aqi-text" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800">--</span>
-                                    </div>
-                                </div>
-                                <div class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5">
-                                    <span class="text-slate-500 text-[10px] block uppercase font-black mb-1 text-slate-500">Облачность</span>
-                                    <span id="clouds" class="font-bold text-lg text-white">--</span><span class="text-xs ml-1 font-bold text-slate-400">%</span>
+                        <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                            <div onclick="toggleAQI()" id="aqi-card" class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5 cursor-pointer hover:bg-slate-800 transition-all hidden group">
+                                <span class="text-slate-500 text-[10px] block uppercase font-black mb-1 group-hover:text-blue-400 font-bold">Воздух (AQI) ▾</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="aqi-val" class="font-bold text-lg">--</span>
+                                    <span id="aqi-text" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800">--</span>
                                 </div>
                             </div>
-                            <div id="aqi-details">
-                                <div class="overflow-hidden">
-                                    <div id="aqi-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5 bg-slate-950/60 rounded-3xl border border-blue-500/10"></div>
-                                </div>
+                            <div class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5">
+                                <span class="text-slate-500 text-[10px] block uppercase font-black mb-1 font-bold">Облачность</span>
+                                <span id="clouds" class="font-bold text-lg">--</span><span class="text-xs ml-1 font-bold text-slate-400">%</span>
                             </div>
                         </div>
+                        <div id="aqi-details"><div class="overflow-hidden"><div id="aqi-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5 bg-slate-950/60 rounded-3xl border border-blue-500/10"></div></div></div>
                     </div>
-
                     <div class="text-center mt-8 md:mt-0">
-                        <div id="weather-icon-box" class="animate-weather hidden">
-                            <img id="main-icon" src="" class="w-32 h-32 md:w-44 md:h-44 object-contain mx-auto drop-shadow-[0_10px_40px_rgba(59,130,246,0.3)]">
-                        </div>
-                        <div id="current-temp" class="text-8xl md:text-9xl font-black text-white leading-none tracking-tighter">--°</div>
-                        <p class="text-slate-500 mt-4 text-xs font-bold uppercase tracking-widest italic">
-                            ☀️ <span id="sunrise" class="text-white">--</span> | 🌙 <span id="sunset" class="text-white">--</span>
-                        </p>
+                        <div id="weather-icon-box" class="animate-weather hidden"><img id="main-icon" src="" class="w-32 h-32 md:w-44 md:h-44 object-contain mx-auto drop-shadow-[0_10px_40px_rgba(59,130,246,0.3)]"></div>
+                        <div id="current-temp" class="text-8xl md:text-9xl font-black leading-none tracking-tighter">--°</div>
+                        <p class="text-slate-500 mt-4 text-xs font-bold uppercase tracking-widest italic text-center text-slate-400">☀️ <span id="sunrise">--</span> | 🌙 <span id="sunset">--</span></p>
                     </div>
                 </div>
                 <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-600/10 rounded-full blur-[100px]"></div>
@@ -81,40 +68,36 @@
 
             <div class="lg:col-span-4 grid grid-cols-2 gap-4">
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center items-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-3 leading-none">Ветер</span>
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-3 leading-none font-bold">Ветер</span>
                     <div class="flex items-center justify-center gap-2 mb-1">
                         <div id="wind-dir" class="text-2xl text-blue-500 transition-transform duration-1000">↑</div>
-                        <span id="wind-dir-text" class="text-lg font-black text-white uppercase tracking-tighter">--</span>
+                        <span id="wind-dir-text" class="text-lg font-black uppercase">--</span>
                     </div>
                     <div class="text-xl font-bold"><span id="wind">--</span> <span class="text-xs text-slate-500">м/с</span></div>
                 </div>
-                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Давление</span>
-                    <div id="pressure" class="text-2xl font-black text-white">--</div>
-                    <span class="text-[10px] text-slate-400 mt-1 uppercase">мм рт.ст.</span>
+                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center font-bold">
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none font-bold text-slate-500">Давление</span>
+                    <div id="pressure" class="text-2xl font-black">--</div>
+                    <span class="text-[10px] text-slate-400 mt-1 uppercase leading-none">мм рт.ст.</span>
                 </div>
-                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Влажность</span>
-                    <div id="humidity" class="text-3xl font-black text-white">--</div>
-                    <span class="text-[10px] text-slate-500 mt-1 uppercase">%</span>
+                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center font-bold">
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none font-bold text-slate-500">Влажность</span>
+                    <div id="humidity" class="text-3xl font-black">--</div>
+                    <span class="text-[10px] text-slate-500 mt-1 uppercase font-bold text-slate-600">%</span>
                 </div>
-                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500 text-slate-500">Ощущается как</span>
-                    <div id="feels-like" class="text-3xl font-black text-white mt-1">--°</div>
+                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center font-bold">
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Ощущается как</span>
+                    <div id="feels-like" class="text-3xl font-black mt-1">--°</div>
                 </div>
             </div>
         </div>
 
         <div id="hourly-grid" class="flex gap-4 overflow-x-auto pb-6 mb-8 no-scrollbar scroll-smooth"></div>
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="glass p-8 rounded-[2.5rem]">
-                <h3 class="text-lg font-bold mb-6">📊 Тренд температуры</h3>
-                <div class="h-[250px] w-full"><canvas id="tempChart"></canvas></div>
-            </div>
+            <div class="glass p-8 rounded-[2.5rem]"><h3 class="text-lg font-bold mb-6">📊 Тренд температуры</h3><div class="h-[250px] w-full"><canvas id="tempChart"></canvas></div></div>
             <div id="map" class="h-[350px] lg:h-auto rounded-[2.5rem] border border-white/5 z-0 shadow-2xl"></div>
         </div>
-        <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4 px-2"></div>
+        <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4 px-2 text-white"></div>
     </div>
 
     <script>
@@ -136,29 +119,37 @@
         const toggleAQI = () => document.getElementById('aqi-details').classList.toggle('open');
 
         async function fetchWeather(query) {
+            document.getElementById('city-name').innerText = "Загрузка...";
+            
+            // Тайм-аут для предотвращения вечной загрузки
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
             try {
                 let coords;
                 if (typeof query === 'string') {
-                    const gRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=1&appid=${API_KEY}`);
+                    const gRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=1&appid=${API_KEY}`, { signal: controller.signal });
                     const gData = await gRes.json();
                     if (!gData || !gData.length) throw new Error("Город не найден");
                     coords = { lat: gData[0].lat, lon: gData[0].lon };
                 } else { coords = query; }
 
-                const wRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}&units=metric&lang=ru`);
-                const wData = await wRes.json();
-                if (wData.cod !== "200") throw new Error(wData.message);
+                const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}&units=metric&lang=ru`, { signal: controller.signal });
+                const weatherData = await weatherRes.json();
+                if (weatherData.cod !== "200") throw new Error(weatherData.message);
                 
                 let aData = null;
                 try {
-                    const aRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}`);
+                    const aRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}`, { signal: controller.signal });
                     aData = await aRes.json();
-                } catch(e) { console.warn("AQI Error"); }
+                } catch(e) { console.warn("AQI Fail"); }
 
-                updateUI(wData, aData);
+                clearTimeout(timeoutId);
+                updateUI(weatherData, aData);
             } catch (e) {
+                clearTimeout(timeoutId);
                 document.getElementById('city-name').innerText = "Ошибка";
-                document.getElementById('current-desc').innerText = e.message;
+                document.getElementById('current-desc').innerText = e.name === 'AbortError' ? "Тайм-аут сети (проверьте интернет)" : e.message;
             }
         }
 
@@ -169,10 +160,10 @@
             document.getElementById('city-name').innerText = city.name;
             document.getElementById('current-temp').innerText = `${Math.round(current.main.temp)}°`;
             document.getElementById('current-desc').innerText = current.weather[0].description;
+            
             const iconBox = document.getElementById('weather-icon-box');
-            const mainIcon = document.getElementById('main-icon');
-            mainIcon.src = `https://openweathermap.org/img/wn/${current.weather[0].icon}@4x.png`;
-            mainIcon.onload = () => iconBox.classList.remove('hidden');
+            document.getElementById('main-icon').src = `https://openweathermap.org/img/wn/${current.weather[0].icon}@4x.png`;
+            iconBox.classList.remove('hidden');
 
             document.getElementById('feels-like').innerText = `${Math.round(current.main.feels_like)}°`;
             document.getElementById('sunrise').innerText = formatT(city.sunrise);
@@ -187,14 +178,13 @@
             if (aqiData) {
                 document.getElementById('aqi-card').classList.remove('hidden');
                 const aqi = aqiData.list[0].main.aqi;
-                const comps = aqiData.list[0].components;
                 document.getElementById('aqi-val').innerText = aqi;
                 document.getElementById('aqi-text').innerText = aqiLevels[aqi].text;
                 document.getElementById('aqi-text').className = `text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 ${aqiLevels[aqi].color}`;
-                document.getElementById('aqi-grid').innerHTML = Object.entries(comps).map(([k,v]) => `
+                document.getElementById('aqi-grid').innerHTML = Object.entries(aqiData.list[0].components).map(([k,v]) => `
                     <div class="flex justify-between items-center bg-white/5 p-2 px-3 rounded-xl border border-white/5">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${pollutantNames[k] || k}</span>
-                        <div class="text-right"><span class="text-sm font-black ${getCompColor(k,v)}">${Math.round(v)}</span></div>
+                        <span class="text-sm font-black ${getCompColor(k,v)}">${Math.round(v)}</span>
                     </div>
                 `).join('');
             }
@@ -213,13 +203,9 @@
                 type: 'line',
                 data: {
                     labels: daily.map(d => new Date(d.dt * 1000).toLocaleDateString('ru', {weekday: 'short'})),
-                    datasets: [{
-                        data: daily.map(d => d.main.temp),
-                        borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                        pointRadius: 5, pointBackgroundColor: '#3b82f6', borderWidth: 3
-                    }]
+                    datasets: [{ data: daily.map(d => d.main.temp), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)', pointRadius: 5, pointBackgroundColor: '#3b82f6', borderWidth: 3 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#ffffff' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#ffffff' } }, x: { ticks: { color: '#94a3b8' } } } }
             });
 
             const coords = [city.coord.lat, city.coord.lon];
@@ -231,7 +217,7 @@
 
             document.getElementById('forecast-grid').innerHTML = daily.map(day => `
                 <div class="glass p-5 rounded-3xl text-center">
-                    <div class="text-slate-500 text-[10px] font-bold uppercase mb-1">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div>
+                    <div class="text-slate-500 text-[10px] font-bold uppercase mb-1 font-bold">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div>
                     <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-12">
                     <div class="text-xl font-black">${Math.round(day.main.temp)}°</div>
                 </div>
