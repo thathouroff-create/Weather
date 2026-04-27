@@ -18,7 +18,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         #aqi-details { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; opacity: 0; }
         #aqi-details.open { grid-template-rows: 1fr; opacity: 1; margin-top: 1.5rem; }
-        #map { cursor: crosshair; } /* Подсказка, что на карту можно нажать */
+        #map { cursor: crosshair; }
     </style>
 </head>
 <body class="pb-12">
@@ -54,7 +54,7 @@
                                     </div>
                                 </div>
                                 <div class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5">
-                                    <span class="text-slate-500 text-[10px] block uppercase font-black mb-1">Облачность</span>
+                                    <span class="text-slate-500 text-[10px] block uppercase font-black mb-1 text-slate-500">Облачность</span>
                                     <span id="clouds" class="font-bold text-lg text-white">--</span><span class="text-xs ml-1 font-bold text-slate-400">%</span>
                                 </div>
                             </div>
@@ -94,12 +94,12 @@
                     <span class="text-[10px] text-slate-400 mt-1 uppercase">мм рт.ст.</span>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none">Влажность</span>
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Влажность</span>
                     <div id="humidity" class="text-3xl font-black text-white">--</div>
                     <span class="text-[10px] text-slate-500 mt-1 uppercase">%</span>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Ощущается как</span>
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500 text-slate-500">Ощущается как</span>
                     <div id="feels-like" class="text-3xl font-black text-white mt-1">--°</div>
                 </div>
             </div>
@@ -119,18 +119,10 @@
 
     <script>
         const API_KEY = "604b73696fe82cfda93d7d8278c9faff"; 
-        let map, chart, clickMarker;
+        let map, chart;
 
-        const aqiLevels = {
-            1: { text: "Чисто", color: "text-green-400" },
-            2: { text: "Норма", color: "text-yellow-400" },
-            3: { text: "Средне", color: "text-orange-400" },
-            4: { text: "Плохо", color: "text-red-400" },
-            5: { text: "Опасно", color: "text-purple-400" }
-        };
-
-        const pollutantNames = { co: "CO", no: "NO", no2: "NO₂", o3: "O₃", so2: "SO₂", pm2_5: "PM2.5", pm10: "PM10", nh3: "NH₃" };
-
+        const aqiLevels = { 1: { text: "Чисто", color: "text-green-400" }, 2: { text: "Норма", color: "text-yellow-400" }, 3: { text: "Средне", color: "text-orange-400" }, 4: { text: "Плохо", color: "text-red-400" }, 5: { text: "Опасно", color: "text-purple-400" } };
+        const pollutantNames = { co: "CO (Угарный)", no: "NO", no2: "NO₂", o3: "O₃ (Озон)", so2: "SO₂", pm2_5: "PM2.5 (Пыль)", pm10: "PM10 (Пыль)", nh3: "NH₃" };
         const getCompColor = (key, val) => {
             const limits = { pm2_5: [10, 25, 50, 75], pm10: [20, 50, 100, 200], no2: [40, 70, 150, 200], o3: [60, 100, 140, 180], so2: [20, 80, 250, 350], co: [4400, 9400, 12400, 15400], no: [20, 50, 100, 200], nh3: [50, 100, 200, 500] };
             if (!limits[key]) return 'text-white';
@@ -140,7 +132,6 @@
             if (val <= m) return 'text-orange-400';
             return 'text-red-400';
         };
-
         const formatT = (ts) => new Date(ts * 1000).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
         const toggleAQI = () => document.getElementById('aqi-details').classList.toggle('open');
 
@@ -150,12 +141,13 @@
                 if (typeof query === 'string') {
                     const gRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=1&appid=${API_KEY}`);
                     const gData = await gRes.json();
-                    if (!gData.length) throw new Error("Город не найден");
+                    if (!gData || !gData.length) throw new Error("Город не найден");
                     coords = { lat: gData[0].lat, lon: gData[0].lon };
                 } else { coords = query; }
 
                 const wRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}&units=metric&lang=ru`);
                 const wData = await wRes.json();
+                if (wData.cod !== "200") throw new Error(wData.message);
                 
                 let aData = null;
                 try {
@@ -230,19 +222,39 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#ffffff' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } } }
             });
 
-            // ОБНОВЛЕННАЯ КАРТА С КЛИКОМ
             const coords = [city.coord.lat, city.coord.lon];
             if (map) map.remove();
             map = L.map('map', { zoomControl: false }).setView(coords, 11);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
             L.circle(coords, { color: '#3b82f6', radius: 2000, fillOpacity: 0.1, weight: 1 }).addTo(map);
-            
-            // Слушаем клик на карте
-            map.on('click', function(e) {
-                const clickCoords = { lat: e.latlng.lat, lon: e.latlng.lng };
-                fetchWeather(clickCoords); // Загружаем погоду для места клика
-            });
+            map.on('click', (e) => fetchWeather({ lat: e.latlng.lat, lon: e.latlng.lng }));
 
             document.getElementById('forecast-grid').innerHTML = daily.map(day => `
                 <div class="glass p-5 rounded-3xl text-center">
-                    <div class="text-slate-500 text-[10px] font-bold uppercase mb-1">${new Date(day.dt * 1000).toLocaleDateString('ru', {day
+                    <div class="text-slate-500 text-[10px] font-bold uppercase mb-1">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div>
+                    <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-12">
+                    <div class="text-xl font-black">${Math.round(day.main.temp)}°</div>
+                </div>
+            `).join('');
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    p => fetchWeather({ lat: p.coords.latitude, lon: p.coords.longitude }),
+                    () => fetchWeather("Moscow"),
+                    { timeout: 5000 }
+                );
+            } else { fetchWeather("Moscow"); }
+        }
+
+        function searchCity() {
+            const v = document.getElementById('city-input').value;
+            if (v) fetchWeather(v);
+        }
+
+        document.getElementById('city-input').addEventListener('keypress', e => { if (e.key === 'Enter') searchCity(); });
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
