@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # ОБЯЗАТЕЛЬНЫЙ БЛОК ПРАВ:
+    # Даем права на запись, чтобы бот мог создать ветку gh-pages
     permissions:
       contents: write
     
@@ -18,7 +18,7 @@ jobs:
 
       - name: Inject API Key
         run: |
-          # Используем | как разделитель, на случай если в ключе есть косые черты
+          # Меняем метку REPLACE_WITH_API_KEY на секрет из настроек
           sed -i 's|REPLACE_WITH_API_KEY|${{ secrets.WEATHER_API_KEY }}|g' index.html
 
       - name: Deploy to GitHub Pages
@@ -26,3 +26,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
+          
