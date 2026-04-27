@@ -21,13 +21,26 @@
         .animate-weather { animation: float 4s ease-in-out infinite; }
         .wind-arrow { transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Анимация раскрытия панели */
+        #aqi-details {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.5s ease-out, opacity 0.3s ease;
+            opacity: 0;
+        }
+        #aqi-details.open {
+            grid-template-rows: 1fr;
+            opacity: 1;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body class="pb-12">
     <div class="container mx-auto p-4 max-w-6xl">
         
-        <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 mt-6 text-center md:text-left">
-            <h1 class="text-3xl font-black text-white tracking-tighter uppercase italic">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 mt-6">
+            <h1 class="text-4xl font-black text-white tracking-tighter uppercase italic">
                 <span class="text-blue-400">Sky</span>Cast
             </h1>
             <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
@@ -45,17 +58,26 @@
                     <h2 id="city-name" class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-white mb-2 break-words leading-tight">Загрузка...</h2>
                     <p id="current-desc" class="text-blue-400 text-xl md:text-2xl font-medium capitalize mb-6"></p>
                     
-                    <div class="flex flex-wrap gap-3 justify-center md:justify-start">
-                        <div class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5">
-                            <span class="text-slate-500 text-[10px] block uppercase font-black mb-1">Воздух (AQI)</span>
-                            <div class="flex items-center gap-2">
-                                <span id="aqi-val" class="font-bold text-lg text-white">--</span>
-                                <span id="aqi-text" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800">--</span>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                            <div onclick="toggleAQI()" class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5 cursor-pointer hover:bg-slate-800 transition-all group active:scale-95">
+                                <span class="text-slate-500 text-[10px] block uppercase font-black mb-1 group-hover:text-blue-400 transition-colors">Воздух (AQI) ▾</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="aqi-val" class="font-bold text-lg text-white">--</span>
+                                    <span id="aqi-text" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800">--</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5">
+                                <span class="text-slate-500 text-[10px] block uppercase font-black mb-1">Облачность</span>
+                                <span id="clouds" class="font-bold text-lg text-white">--</span><span class="text-xs ml-1 font-bold text-slate-400">%</span>
                             </div>
                         </div>
-                        <div class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5">
-                            <span class="text-slate-500 text-[10px] block uppercase font-black mb-1">Облачность</span>
-                            <span id="clouds" class="font-bold text-lg text-white">--</span><span class="text-xs ml-1 font-bold text-slate-400">%</span>
+
+                        <div id="aqi-details">
+                            <div class="overflow-hidden">
+                                <div id="aqi-components-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-slate-900/80 rounded-2xl border border-blue-500/20">
+                                    </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -65,192 +87,4 @@
                         <img id="main-icon" src="" class="w-32 h-32 md:w-44 md:h-44 object-contain mx-auto drop-shadow-[0_10px_40px_rgba(59,130,246,0.3)]">
                     </div>
                     <div id="current-temp" class="text-8xl md:text-9xl font-black text-white leading-none tracking-tighter">--°</div>
-                    <p class="text-slate-500 mt-4 text-xs font-bold uppercase tracking-widest">
-                        ☀️ <span id="sunrise" class="text-white">--:--</span> | 🌙 <span id="sunset" class="text-white">--:--</span>
-                    </p>
-                </div>
-                <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-600/10 rounded-full blur-[100px]"></div>
-            </div>
-
-            <div class="lg:col-span-4 grid grid-cols-2 gap-4">
-                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center items-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-3 leading-none">Ветер</span>
-                    <div class="flex items-center justify-center gap-2 mb-1">
-                        <div id="wind-dir" class="wind-arrow text-2xl text-blue-500">↑</div>
-                        <span id="wind-dir-text" class="text-lg font-black text-white uppercase">--</span>
-                    </div>
-                    <div class="text-xl font-bold"><span id="wind">--</span> <span class="text-xs text-slate-500">м/с</span></div>
-                </div>
-                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none">Давление</span>
-                    <div id="pressure" class="text-2xl font-black text-white">--</div>
-                    <span class="text-[10px] text-slate-500 mt-1 uppercase">мм рт.ст.</span>
-                </div>
-                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1">Влажность</span>
-                    <div id="humidity" class="text-3xl font-black text-white">--</div>
-                    <span class="text-[10px] text-slate-500 mt-1 uppercase">%</span>
-                </div>
-                <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none">Ощущается как</span>
-                    <div id="feels-like" class="text-3xl font-black text-white mt-1">--°</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="hourly-grid" class="flex gap-4 overflow-x-auto pb-6 mb-8 no-scrollbar scroll-smooth"></div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="glass p-8 rounded-[2.5rem]">
-                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">📊 Тренд температуры</h3>
-                <div class="h-[250px] w-full"><canvas id="tempChart"></canvas></div>
-            </div>
-            <div id="map" class="h-[350px] lg:h-auto rounded-[2.5rem] border border-white/5 z-0 shadow-2xl"></div>
-        </div>
-
-        <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4 px-2"></div>
-    </div>
-
-    <script>
-        const API_KEY = "604b73696fe82cfda93d7d8278c9faff"; 
-        let map, chart;
-
-        const aqiLevels = {
-            1: { text: "Чисто", color: "text-green-400" },
-            2: { text: "Норма", color: "text-yellow-400" },
-            3: { text: "Средне", color: "text-orange-400" },
-            4: { text: "Плохо", color: "text-red-400" },
-            5: { text: "Опасно", color: "text-purple-400" }
-        };
-
-        const getWindDir = (deg) => {
-            const dirs = ['С', 'СВ', 'В', 'ЮВ', 'Ю', 'ЮЗ', 'З', 'СЗ'];
-            return dirs[Math.round(deg / 45) % 8];
-        };
-
-        const formatTime = (ts) => new Date(ts * 1000).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
-
-        async function fetchWeather(query) {
-            try {
-                let coords;
-                if (typeof query === 'string') {
-                    const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=1&appid=${API_KEY}`);
-                    const geoData = await geoRes.json();
-                    if (!geoData.length) throw new Error("Город не найден");
-                    coords = { lat: geoData[0].lat, lon: geoData[0].lon };
-                } else {
-                    coords = query;
-                }
-
-                // Загружаем данные по отдельности, чтобы ошибки не ломали всё
-                const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}&units=metric&lang=ru`);
-                const weatherData = await weatherRes.json();
-                
-                let aqiData = null;
-                try {
-                    const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}`);
-                    aqiData = await aqiRes.json();
-                } catch (e) { console.warn("AQI fail"); }
-
-                updateUI(weatherData, aqiData);
-            } catch (e) {
-                console.error(e);
-                document.getElementById('city-name').innerText = "Ошибка";
-                document.getElementById('current-desc').innerText = "Проверьте VPN/Сеть";
-            }
-        }
-
-        function updateUI(data, aqiData) {
-            const current = data.list[0];
-            const city = data.city;
-
-            const mainIcon = document.getElementById('main-icon');
-            mainIcon.src = `https://openweathermap.org/img/wn/${current.weather[0].icon}@4x.png`;
-            mainIcon.onload = () => document.getElementById('weather-icon-box').classList.remove('hidden');
-
-            document.getElementById('city-name').innerText = city.name;
-            document.getElementById('current-temp').innerText = `${Math.round(current.main.temp)}°`;
-            document.getElementById('current-desc').innerText = current.weather[0].description;
-            document.getElementById('feels-like').innerText = `${Math.round(current.main.feels_like)}°`;
-            document.getElementById('sunrise').innerText = formatTime(city.sunrise);
-            document.getElementById('sunset').innerText = formatTime(city.sunset);
-            
-            if (aqiData) {
-                const aqi = aqiData.list[0].main.aqi;
-                document.getElementById('aqi-val').innerText = aqi;
-                document.getElementById('aqi-text').innerText = aqiLevels[aqi].text;
-                document.getElementById('aqi-text').className = `text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 ${aqiLevels[aqi].color}`;
-            }
-
-            document.getElementById('wind').innerText = Math.round(current.wind.speed);
-            document.getElementById('wind-dir').style.transform = `rotate(${current.wind.deg}deg)`;
-            document.getElementById('wind-dir-text').innerText = getWindDir(current.wind.deg);
-            document.getElementById('humidity').innerText = current.main.humidity;
-            document.getElementById('clouds').innerText = current.clouds.all;
-            document.getElementById('pressure').innerText = Math.round(current.main.pressure * 0.75006);
-
-            document.getElementById('hourly-grid').innerHTML = data.list.slice(0, 10).map(h => `
-                <div class="glass min-w-[110px] p-4 rounded-3xl text-center border-white/5">
-                    <div class="text-slate-500 text-[10px] font-bold mb-1">${h.dt_txt.split(' ')[1].substring(0, 5)}</div>
-                    <img src="https://openweathermap.org/img/wn/${h.weather[0].icon}.png" class="mx-auto w-10">
-                    <div class="text-lg font-black">${Math.round(h.main.temp)}°</div>
-                </div>
-            `).join('');
-
-            const daily = data.list.filter((_, i) => i % 8 === 0);
-            if (chart) chart.destroy();
-            chart = new Chart(document.getElementById('tempChart'), {
-                type: 'line',
-                data: {
-                    labels: daily.map(d => new Date(d.dt * 1000).toLocaleDateString('ru', {weekday: 'short'})),
-                    datasets: [{
-                        data: daily.map(d => d.main.temp),
-                        borderColor: '#3b82f6', tension: 0.4, fill: true, 
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                        pointRadius: 5, pointBackgroundColor: '#3b82f6', borderWidth: 3
-                    }]
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { 
-                        y: { ticks: { color: '#ffffff' }, grid: { color: 'rgba(255,255,255,0.05)' } }, 
-                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } } 
-                    }
-                }
-            });
-
-            const coords = [city.coord.lat, city.coord.lon];
-            if (map) { map.remove(); }
-            map = L.map('map', { zoomControl: false }).setView(coords, 11);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
-            L.circle(coords, { color: '#3b82f6', radius: 2000, fillOpacity: 0.1, weight: 1 }).addTo(map);
-
-            document.getElementById('forecast-grid').innerHTML = daily.map(day => `
-                <div class="glass p-5 rounded-3xl text-center">
-                    <div class="text-slate-500 text-[10px] font-bold uppercase mb-1">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div>
-                    <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-12">
-                    <div class="text-xl font-black">${Math.round(day.main.temp)}°</div>
-                </div>
-            `).join('');
-        }
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    p => fetchWeather({ lat: p.coords.latitude, lon: p.coords.longitude }),
-                    () => fetchWeather("Moscow")
-                );
-            } else { fetchWeather("Moscow"); }
-        }
-
-        function searchCity() {
-            const val = document.getElementById('city-input').value;
-            if (val) fetchWeather(val);
-        }
-
-        document.getElementById('city-input').addEventListener('keypress', e => { if (e.key === 'Enter') searchCity(); });
-        window.onload = getLocation;
-    </script>
-</body>
-</html>
+                    <p class="text-slate-500 mt-4 text-xs font-bold uppercase tracking
