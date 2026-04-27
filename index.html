@@ -20,24 +20,24 @@
     <div class="container mx-auto p-4 max-w-6xl">
         
         <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 mt-6">
-            <h1 class="text-3xl font-black text-white tracking-tighter">SKYCAST <span class="text-blue-500">PRO</span></h1>
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase">SkyCast <span class="text-blue-500">Pro</span></h1>
             <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
                 <div class="relative flex-grow md:w-64">
-                    <input type="text" id="city-input" placeholder="Город..." class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-3 px-5 focus:outline-none focus:border-blue-500">
+                    <input type="text" id="city-input" placeholder="Поиск города..." class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-3 px-5 focus:outline-none focus:border-blue-500">
                     <button onclick="searchCity()" class="absolute right-2 top-2 bg-blue-600 p-2 rounded-xl">🔍</button>
                 </div>
-                <button onclick="getLocation()" class="bg-slate-800 border border-slate-700 px-5 py-3 rounded-2xl text-sm font-bold">📍 Мое место</button>
+                <button onclick="getLocation()" class="bg-slate-800 border border-slate-700 px-5 py-3 rounded-2xl text-sm font-bold hover:bg-slate-700 transition-colors">📍 Мое место</button>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
             <div class="lg:col-span-8 glass p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
-                <div class="z-10 text-center md:text-left w-full md:max-w-[65%]">
-                    <h2 id="city-name" class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-white mb-2 break-words leading-tight">Определение...</h2>
+                <div class="z-10 text-center md:text-left w-full md:max-w-[60%]">
+                    <h2 id="city-name" class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-white mb-2 break-words leading-tight">Загрузка...</h2>
                     <p id="current-desc" class="text-blue-400 text-xl md:text-2xl font-medium capitalize"></p>
-                    <div class="mt-4 flex gap-6 justify-center md:justify-start text-xs font-bold text-slate-400">
-                        <div class="flex items-center gap-2">☀️ Восход: <span id="sunrise" class="text-white">--:--</span></div>
-                        <div class="flex items-center gap-2">🌙 Закат: <span id="sunset" class="text-white">--:--</span></div>
+                    <div class="mt-4 flex gap-4 justify-center md:justify-start text-xs font-bold text-slate-400">
+                        <span>☀️ <span id="sunrise" class="text-white">--:--</span></span>
+                        <span>🌙 <span id="sunset" class="text-white">--:--</span></span>
                     </div>
                 </div>
                 <div class="z-10 text-center mt-8 md:mt-0">
@@ -54,11 +54,6 @@
                     <span class="text-[10px] text-slate-500">м/с</span>
                 </div>
                 <div class="glass p-5 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-bold uppercase">Мин / Макс</span>
-                    <div class="text-xl font-bold mt-1 text-white"><span id="temp-min">--</span>° / <span id="temp-max">--</span>°</div>
-                    <span class="text-[10px] text-slate-500">за 3 часа</span>
-                </div>
-                <div class="glass p-5 rounded-3xl text-center flex flex-col justify-center">
                     <span class="text-slate-500 text-[10px] font-bold uppercase">Давление</span>
                     <div id="pressure" class="text-xl font-bold mt-1 text-white">--</div>
                     <span class="text-[10px] text-slate-500">мм рт.ст.</span>
@@ -68,18 +63,24 @@
                     <div id="humidity" class="text-2xl font-bold mt-1 text-white">--</div>
                     <span class="text-[10px] text-slate-500">%</span>
                 </div>
+                <div class="glass p-5 rounded-3xl text-center flex flex-col justify-center">
+                    <span class="text-slate-500 text-[10px] font-bold uppercase">Осадки</span>
+                    <div id="pop" class="text-xl font-bold mt-1 text-white">--</div>
+                    <span class="text-[10px] text-slate-500">% шанс</span>
+                </div>
             </div>
         </div>
 
-        <h3 class="text-sm font-bold mb-4 px-4 uppercase tracking-widest text-slate-500">Ближайшие 24 часа</h3>
         <div id="hourly-grid" class="flex gap-4 overflow-x-auto pb-6 mb-8 no-scrollbar"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <div class="glass p-8 rounded-[2.5rem]">
-                <h3 class="text-lg font-bold mb-6">📈 Температурный тренд</h3>
-                <canvas id="tempChart" height="200"></canvas>
+                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">📉 Температурный тренд</h3>
+                <div class="h-[250px] w-full">
+                    <canvas id="tempChart"></canvas>
+                </div>
             </div>
-            <div id="map" class="h-full min-h-[350px] rounded-[2.5rem] border border-white/5 z-0 shadow-2xl"></div>
+            <div id="map" class="h-[350px] lg:h-auto rounded-[2.5rem] border border-white/5 z-0 shadow-2xl"></div>
         </div>
 
         <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
@@ -89,9 +90,7 @@
         const API_KEY = "604b73696fe82cfda93d7d8278c9faff"; 
         let map, chart;
 
-        const formatTime = (timestamp) => {
-            return new Date(timestamp * 1000).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
-        };
+        const formatTime = (ts) => new Date(ts * 1000).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
 
         async function fetchWeather(query) {
             try {
@@ -103,7 +102,10 @@
                 const data = await res.json();
                 if (data.cod !== "200") throw new Error(data.message);
                 updateUI(data);
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error("Ошибка API:", e);
+                document.getElementById('city-name').innerText = "Город не найден";
+            }
         }
 
         function updateUI(data) {
@@ -111,60 +113,64 @@
             const current = list[0];
             const city = data.city;
             
-            // 1. Почасовой (добавили мм осадков)
+            // 1. Почасовой
             document.getElementById('hourly-grid').innerHTML = list.slice(0, 8).map(h => {
-                const precip = h.rain ? h.rain['3h'] : (h.snow ? h.snow['3h'] : 0);
-                return `
-                <div class="glass min-w-[130px] p-5 rounded-3xl text-center border-white/5">
+                const rain = h.rain ? h.rain['3h'] : (h.snow ? h.snow['3h'] : 0);
+                return `<div class="glass min-w-[130px] p-5 rounded-3xl text-center">
                     <div class="text-slate-500 text-[10px] font-bold">${h.dt_txt.split(' ')[1].substring(0, 5)}</div>
                     <img src="https://openweathermap.org/img/wn/${h.weather[0].icon}.png" class="mx-auto w-10">
                     <div class="text-xl font-black">${Math.round(h.main.temp)}°</div>
-                    <div class="text-[9px] font-bold mt-1 ${precip > 0 ? 'text-blue-400' : 'text-slate-600'}">
-                        ${precip > 0 ? precip + ' мм' : 'Без осадков'}
+                    <div class="text-[9px] font-bold mt-1 ${rain > 0 ? 'text-blue-400' : 'text-slate-600'}">
+                        ${rain > 0 ? rain + ' мм' : 'Без осадков'}
                     </div>
                 </div>`;
             }).join('');
 
-            // 2. Основные данные + Солнце
+            // 2. Основное
             document.getElementById('city-name').innerText = city.name;
             document.getElementById('current-temp').innerText = `${Math.round(current.main.temp)}°`;
             document.getElementById('current-desc').innerText = current.weather[0].description;
             document.getElementById('feels-like').innerText = Math.round(current.main.feels_like);
             document.getElementById('sunrise').innerText = formatTime(city.sunrise);
             document.getElementById('sunset').innerText = formatTime(city.sunset);
-            
-            // Сетка параметров
             document.getElementById('wind').innerText = Math.round(current.wind.speed);
             document.getElementById('gust').innerText = Math.round(current.wind.gust || current.wind.speed);
-            document.getElementById('temp-min').innerText = Math.round(current.main.temp_min);
-            document.getElementById('temp-max').innerText = Math.round(current.main.temp_max);
             document.getElementById('humidity').innerText = current.main.humidity;
             document.getElementById('pressure').innerText = Math.round(current.main.pressure * 0.75006);
             document.getElementById('pop').innerText = Math.round(current.pop * 100);
 
-            // 3. График
+            // 3. График (Исправлен)
             const daily = list.filter((_, i) => i % 8 === 0);
+            const canvas = document.getElementById('tempChart');
             if (chart) chart.destroy();
-            chart = new Chart(document.getElementById('tempChart'), {
+            chart = new Chart(canvas, {
                 type: 'line',
                 data: {
                     labels: daily.map(d => new Date(d.dt * 1000).toLocaleDateString('ru', {weekday: 'short'})),
                     datasets: [{
                         data: daily.map(d => d.main.temp),
                         borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59,130,246,0.1)',
-                        pointRadius: 6, pointBackgroundColor: '#3b82f6', borderWidth: 4
+                        pointRadius: 6, pointBackgroundColor: '#3b82f6', borderWidth: 3
                     }]
                 },
                 options: { 
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: { 
-                        y: { display: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                        y: { ticks: { color: '#ffffff', font: { weight: 'bold' } }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
                     }
                 }
             });
 
-            // 4. Неделя
+            // 4. Карта (Исправлена)
+            const coords = [city.coord.lat, city.coord.lon];
+            if (map) { map.remove(); } // Удаляем старую карту перед созданием новой
+            map = L.map('map', { zoomControl: false }).setView(coords, 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
+            L.circle(coords, { color: '#3b82f6', radius: 2000, fillOpacity: 0.1, weight: 1 }).addTo(map);
+
+            // 5. Неделя
             document.getElementById('forecast-grid').innerHTML = daily.map(day => `
                 <div class="glass p-5 rounded-3xl text-center">
                     <div class="text-slate-500 text-[10px] font-bold uppercase mb-1">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div>
@@ -172,14 +178,6 @@
                     <div class="text-2xl font-black">${Math.round(day.main.temp)}°</div>
                 </div>
             `).join('');
-
-            // 5. Карта
-            const coords = [city.coord.lat, city.coord.lon];
-            if (!map) {
-                map = L.map('map', { zoomControl: false }).setView(coords, 11);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
-            } else { map.setView(coords, 11); }
-            L.circle(coords, { color: '#3b82f6', radius: 1500, fillOpacity: 0.1, weight: 1 }).addTo(map);
         }
 
         function getLocation() {
@@ -188,14 +186,16 @@
                     p => fetchWeather({ lat: p.coords.latitude, lon: p.coords.longitude }),
                     () => fetchWeather("Moscow")
                 );
-            }
+            } else { fetchWeather("Moscow"); }
         }
+
         function searchCity() {
             const val = document.getElementById('city-input').value;
             if (val) fetchWeather(val);
         }
+
         document.getElementById('city-input').addEventListener('keypress', e => { if (e.key === 'Enter') searchCity(); });
-        getLocation();
+        window.onload = getLocation;
     </script>
 </body>
 </html>
