@@ -37,7 +37,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-            <div class="lg:col-span-8 glass p-6 sm:p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl transition-all">
+            <div class="lg:col-span-8 glass p-6 sm:p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
                 <div class="flex flex-col md:flex-row justify-between items-center relative z-10">
                     <div class="text-center md:text-left w-full md:max-w-[65%]">
                         <h2 id="city-name" class="text-4xl sm:text-6xl font-extrabold tracking-tighter text-white mb-2 break-words leading-tight">Загрузка...</h2>
@@ -71,7 +71,7 @@
                             <img id="main-icon" src="" class="w-32 h-32 md:w-44 md:h-44 object-contain mx-auto drop-shadow-[0_10px_40px_rgba(59,130,246,0.3)]">
                         </div>
                         <div id="current-temp" class="text-8xl md:text-9xl font-black text-white leading-none tracking-tighter">--°</div>
-                        <p class="text-slate-500 mt-4 text-xs font-bold uppercase tracking-widest">
+                        <p class="text-slate-500 mt-4 text-xs font-bold uppercase tracking-widest italic text-center">
                             ☀️ <span id="sunrise" class="text-white">--</span> | 🌙 <span id="sunset" class="text-white">--</span>
                         </p>
                     </div>
@@ -84,14 +84,14 @@
                     <span class="text-slate-500 text-[10px] font-black uppercase mb-3 leading-none">Ветер</span>
                     <div class="flex items-center justify-center gap-2 mb-1">
                         <div id="wind-dir" class="text-2xl text-blue-500 transition-transform duration-1000">↑</div>
-                        <span id="wind-dir-text" class="text-lg font-black text-white uppercase tracking-tighter">--</span>
+                        <span id="wind-dir-text" class="text-lg font-black text-white">--</span>
                     </div>
                     <div class="text-xl font-bold"><span id="wind">--</span> <span class="text-xs text-slate-500">м/с</span></div>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
                     <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Давление</span>
                     <div id="pressure" class="text-2xl font-black text-white">--</div>
-                    <span class="text-[10px] text-slate-400 mt-1 uppercase">мм рт.ст.</span>
+                    <span class="text-[10px] text-slate-400 mt-1 uppercase leading-none">мм рт.ст.</span>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
                     <span class="text-slate-500 text-[10px] font-black uppercase mb-1">Влажность</span>
@@ -130,23 +130,22 @@
         };
 
         const pollutantNames = {
-            co: "CO (Угарный газ)",
-            no: "NO (Оксид азота)",
-            no2: "NO₂ (Диоксид азота)",
-            o3: "O₃ (Озон)",
-            so2: "SO₂ (Диоксид серы)",
-            pm2_5: "PM2.5 (Мелкая пыль)",
-            pm10: "PM10 (Крупная пыль)",
-            nh3: "NH₃ (Аммиак)"
+            co: "CO (Угарный газ)", no: "NO (Оксид азота)", no2: "NO₂ (Диоксид азота)",
+            o3: "O₃ (Озон)", so2: "SO₂ (Диоксид серы)", pm2_5: "PM2.5 (Мелкая пыль)",
+            pm10: "PM10 (Крупная пыль)", nh3: "NH₃ (Аммиак)"
         };
 
-        // Логика цветовой индикации для конкретных веществ
+        // ТЕПЕРЬ ТУТ ВСЕ ГАЗЫ
         const getCompColor = (key, val) => {
             const limits = {
                 pm2_5: [10, 25, 50, 75],
                 pm10: [20, 50, 100, 200],
                 no2: [40, 70, 150, 200],
-                o3: [60, 100, 140, 180]
+                o3: [60, 100, 140, 180],
+                so2: [20, 80, 250, 350],
+                co: [4400, 9400, 12400, 15400],
+                no: [20, 50, 100, 200],
+                nh3: [50, 100, 200, 500]
             };
             if (!limits[key]) return 'text-white';
             const [g, f, m, p] = limits[key];
@@ -215,7 +214,6 @@
                 document.getElementById('aqi-text').innerText = aqiLevels[aqi].text;
                 document.getElementById('aqi-text').className = `text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 ${aqiLevels[aqi].color}`;
                 
-                // Рендерим детализацию газов с цветами и описанием
                 document.getElementById('aqi-grid').innerHTML = Object.entries(comps).map(([k,v]) => `
                     <div class="flex justify-between items-center bg-white/5 p-2 px-3 rounded-xl border border-white/5">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${pollutantNames[k] || k}</span>
