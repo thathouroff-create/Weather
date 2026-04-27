@@ -18,6 +18,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         #aqi-details { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; opacity: 0; }
         #aqi-details.open { grid-template-rows: 1fr; opacity: 1; margin-top: 1.5rem; }
+        #map { cursor: crosshair; } /* Подсказка, что на карту можно нажать */
     </style>
 </head>
 <body class="pb-12">
@@ -59,8 +60,7 @@
                             </div>
                             <div id="aqi-details">
                                 <div class="overflow-hidden">
-                                    <div id="aqi-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5 bg-slate-950/60 rounded-3xl border border-blue-500/10">
-                                        </div>
+                                    <div id="aqi-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5 bg-slate-950/60 rounded-3xl border border-blue-500/10"></div>
                                 </div>
                             </div>
                         </div>
@@ -71,7 +71,7 @@
                             <img id="main-icon" src="" class="w-32 h-32 md:w-44 md:h-44 object-contain mx-auto drop-shadow-[0_10px_40px_rgba(59,130,246,0.3)]">
                         </div>
                         <div id="current-temp" class="text-8xl md:text-9xl font-black text-white leading-none tracking-tighter">--°</div>
-                        <p class="text-slate-500 mt-4 text-xs font-bold uppercase tracking-widest italic text-center">
+                        <p class="text-slate-500 mt-4 text-xs font-bold uppercase tracking-widest italic">
                             ☀️ <span id="sunrise" class="text-white">--</span> | 🌙 <span id="sunset" class="text-white">--</span>
                         </p>
                     </div>
@@ -84,19 +84,19 @@
                     <span class="text-slate-500 text-[10px] font-black uppercase mb-3 leading-none">Ветер</span>
                     <div class="flex items-center justify-center gap-2 mb-1">
                         <div id="wind-dir" class="text-2xl text-blue-500 transition-transform duration-1000">↑</div>
-                        <span id="wind-dir-text" class="text-lg font-black text-white">--</span>
+                        <span id="wind-dir-text" class="text-lg font-black text-white uppercase tracking-tighter">--</span>
                     </div>
                     <div class="text-xl font-bold"><span id="wind">--</span> <span class="text-xs text-slate-500">м/с</span></div>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
                     <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Давление</span>
                     <div id="pressure" class="text-2xl font-black text-white">--</div>
-                    <span class="text-[10px] text-slate-400 mt-1 uppercase leading-none">мм рт.ст.</span>
+                    <span class="text-[10px] text-slate-400 mt-1 uppercase">мм рт.ст.</span>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1">Влажность</span>
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none">Влажность</span>
                     <div id="humidity" class="text-3xl font-black text-white">--</div>
-                    <span class="text-[10px] text-slate-500 mt-1 uppercase font-bold text-slate-600">%</span>
+                    <span class="text-[10px] text-slate-500 mt-1 uppercase">%</span>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
                     <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Ощущается как</span>
@@ -119,7 +119,7 @@
 
     <script>
         const API_KEY = "604b73696fe82cfda93d7d8278c9faff"; 
-        let map, chart;
+        let map, chart, clickMarker;
 
         const aqiLevels = {
             1: { text: "Чисто", color: "text-green-400" },
@@ -129,24 +129,10 @@
             5: { text: "Опасно", color: "text-purple-400" }
         };
 
-        const pollutantNames = {
-            co: "CO (Угарный газ)", no: "NO (Оксид азота)", no2: "NO₂ (Диоксид азота)",
-            o3: "O₃ (Озон)", so2: "SO₂ (Диоксид серы)", pm2_5: "PM2.5 (Мелкая пыль)",
-            pm10: "PM10 (Крупная пыль)", nh3: "NH₃ (Аммиак)"
-        };
+        const pollutantNames = { co: "CO", no: "NO", no2: "NO₂", o3: "O₃", so2: "SO₂", pm2_5: "PM2.5", pm10: "PM10", nh3: "NH₃" };
 
-        // ТЕПЕРЬ ТУТ ВСЕ ГАЗЫ
         const getCompColor = (key, val) => {
-            const limits = {
-                pm2_5: [10, 25, 50, 75],
-                pm10: [20, 50, 100, 200],
-                no2: [40, 70, 150, 200],
-                o3: [60, 100, 140, 180],
-                so2: [20, 80, 250, 350],
-                co: [4400, 9400, 12400, 15400],
-                no: [20, 50, 100, 200],
-                nh3: [50, 100, 200, 500]
-            };
+            const limits = { pm2_5: [10, 25, 50, 75], pm10: [20, 50, 100, 200], no2: [40, 70, 150, 200], o3: [60, 100, 140, 180], so2: [20, 80, 250, 350], co: [4400, 9400, 12400, 15400], no: [20, 50, 100, 200], nh3: [50, 100, 200, 500] };
             if (!limits[key]) return 'text-white';
             const [g, f, m, p] = limits[key];
             if (val <= g) return 'text-green-400';
@@ -213,14 +199,10 @@
                 document.getElementById('aqi-val').innerText = aqi;
                 document.getElementById('aqi-text').innerText = aqiLevels[aqi].text;
                 document.getElementById('aqi-text').className = `text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 ${aqiLevels[aqi].color}`;
-                
                 document.getElementById('aqi-grid').innerHTML = Object.entries(comps).map(([k,v]) => `
                     <div class="flex justify-between items-center bg-white/5 p-2 px-3 rounded-xl border border-white/5">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${pollutantNames[k] || k}</span>
-                        <div class="text-right">
-                            <span class="text-sm font-black ${getCompColor(k,v)}">${Math.round(v)}</span>
-                            <span class="text-[8px] text-slate-600 block leading-none">мкг/м³</span>
-                        </div>
+                        <div class="text-right"><span class="text-sm font-black ${getCompColor(k,v)}">${Math.round(v)}</span></div>
                     </div>
                 `).join('');
             }
@@ -248,37 +230,19 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#ffffff' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } } }
             });
 
+            // ОБНОВЛЕННАЯ КАРТА С КЛИКОМ
             const coords = [city.coord.lat, city.coord.lon];
             if (map) map.remove();
             map = L.map('map', { zoomControl: false }).setView(coords, 11);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
             L.circle(coords, { color: '#3b82f6', radius: 2000, fillOpacity: 0.1, weight: 1 }).addTo(map);
+            
+            // Слушаем клик на карте
+            map.on('click', function(e) {
+                const clickCoords = { lat: e.latlng.lat, lon: e.latlng.lng };
+                fetchWeather(clickCoords); // Загружаем погоду для места клика
+            });
 
             document.getElementById('forecast-grid').innerHTML = daily.map(day => `
                 <div class="glass p-5 rounded-3xl text-center">
-                    <div class="text-slate-500 text-[10px] font-bold uppercase mb-1">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div>
-                    <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-12">
-                    <div class="text-xl font-black">${Math.round(day.main.temp)}°</div>
-                </div>
-            `).join('');
-        }
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    p => fetchWeather({ lat: p.coords.latitude, lon: p.coords.longitude }),
-                    () => fetchWeather("Moscow")
-                );
-            } else { fetchWeather("Moscow"); }
-        }
-
-        function searchCity() {
-            const v = document.getElementById('city-input').value;
-            if (v) fetchWeather(v);
-        }
-
-        document.getElementById('city-input').addEventListener('keypress', e => { if (e.key === 'Enter') searchCity(); });
-        window.onload = getLocation;
-    </script>
-</body>
-</html>
+                    <div class="text-slate-500 text-[10px] font-bold uppercase mb-1">${new Date(day.dt * 1000).toLocaleDateString('ru', {day
