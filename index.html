@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyCast Pro Max</title>
+    <title>SkyCast</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -26,10 +26,12 @@
 <body class="pb-12">
     <div class="container mx-auto p-4 max-w-6xl">
         
-        <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 mt-6">
-            <h1 class="text-3xl font-black text-white tracking-tighter uppercase italic">SkyCast <span class="text-blue-500">Pro Max</span></h1>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 mt-6 text-center md:text-left">
+            <h1 class="text-3xl font-black text-white tracking-tighter uppercase italic">
+                <span class="text-blue-400">Sky</span>Cast
+            </h1>
             <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                <div class="relative flex-grow md:w-64 text-slate-900">
+                <div class="relative flex-grow md:w-64">
                     <input type="text" id="city-input" placeholder="Поиск города..." class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-3 px-5 focus:outline-none focus:border-blue-500 text-white">
                     <button onclick="searchCity()" class="absolute right-2 top-2 bg-blue-600 p-2 rounded-xl text-white">🔍</button>
                 </div>
@@ -72,7 +74,7 @@
 
             <div class="lg:col-span-4 grid grid-cols-2 gap-4">
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center items-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-3 leading-none">Направление ветра</span>
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-3 leading-none">Ветер</span>
                     <div class="flex items-center justify-center gap-2 mb-1">
                         <div id="wind-dir" class="wind-arrow text-2xl text-blue-500">↑</div>
                         <span id="wind-dir-text" class="text-lg font-black text-white uppercase">--</span>
@@ -85,14 +87,13 @@
                     <span class="text-[10px] text-slate-500 mt-1 uppercase">мм рт.ст.</span>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none">Влажность</span>
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1">Влажность</span>
                     <div id="humidity" class="text-3xl font-black text-white">--</div>
                     <span class="text-[10px] text-slate-500 mt-1 uppercase">%</span>
                 </div>
                 <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none">Ощущается</span>
-                    <div id="feels-like" class="text-3xl font-black text-white">--°</div>
-                    <span class="text-[10px] text-slate-500 mt-1 uppercase italic text-blue-400">как</span>
+                    <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none">Ощущается как</span>
+                    <div id="feels-like" class="text-3xl font-black text-white mt-1">--°</div>
                 </div>
             </div>
         </div>
@@ -107,7 +108,7 @@
             <div id="map" class="h-[350px] lg:h-auto rounded-[2.5rem] border border-white/5 z-0 shadow-2xl"></div>
         </div>
 
-        <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+        <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4 px-2"></div>
     </div>
 
     <script>
@@ -141,7 +142,7 @@
                     coords = query;
                 }
 
-                // Загружаем по очереди, чтобы ошибка в одном не ломала всё
+                // Загружаем данные по отдельности, чтобы ошибки не ломали всё
                 const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}&units=metric&lang=ru`);
                 const weatherData = await weatherRes.json();
                 
@@ -149,13 +150,13 @@
                 try {
                     const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}`);
                     aqiData = await aqiRes.json();
-                } catch (e) { console.warn("AQI data failed"); }
+                } catch (e) { console.warn("AQI fail"); }
 
                 updateUI(weatherData, aqiData);
             } catch (e) {
                 console.error(e);
                 document.getElementById('city-name').innerText = "Ошибка";
-                document.getElementById('current-desc').innerText = e.message;
+                document.getElementById('current-desc').innerText = "Проверьте VPN/Сеть";
             }
         }
 
