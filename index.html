@@ -14,15 +14,13 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #e2e8f0; margin: 0; min-height: 100vh; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* Стили карты */
-        #map { height: 300px; border-radius: 2rem; border: 1px solid rgba(255,255,255,0.1); z-index: 1; }
+        #map { height: 320px; border-radius: 2.5rem; border: 1px solid rgba(255,255,255,0.1); width: 100%; pointer-events: none; }
         .map-tiles { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
 
-        /* Skeleton Loader */
         .skeleton { 
-            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); 
+            background: linear-gradient(90deg, #1e293b 25%, #2d3e5a 50%, #1e293b 75%); 
             background-size: 200% 100%; 
-            animation: shimmer 2s infinite linear; 
+            animation: shimmer 1.5s infinite linear; 
         }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
@@ -43,8 +41,8 @@
             <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
                 <form onsubmit="event.preventDefault(); searchCity();" class="relative flex-grow md:w-64">
                     <input type="text" id="city-input" placeholder="Поиск города..." 
-                           class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-3 px-5 pr-14 focus:outline-none focus:border-blue-500 text-white placeholder-slate-500">
-                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-500 w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all">
+                           class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-3 px-5 pr-14 focus:outline-none focus:border-blue-500 text-white placeholder-slate-500 font-medium">
+                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-500 w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all active:scale-90">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -58,10 +56,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div class="lg:col-span-8 h-80 skeleton rounded-[2.5rem]"></div>
                 <div class="lg:col-span-4 grid grid-cols-2 gap-4">
-                    <div class="h-32 skeleton rounded-3xl"></div>
-                    <div class="h-32 skeleton rounded-3xl"></div>
-                    <div class="h-32 skeleton rounded-3xl"></div>
-                    <div class="h-32 skeleton rounded-3xl"></div>
+                    <div class="h-36 skeleton rounded-3xl"></div>
+                    <div class="h-36 skeleton rounded-3xl"></div>
+                    <div class="h-36 skeleton rounded-3xl"></div>
+                    <div class="h-36 skeleton rounded-3xl"></div>
                 </div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -75,7 +73,7 @@
                 <div class="lg:col-span-8 glass p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl text-white">
                     <div class="flex flex-col md:flex-row justify-between items-center relative z-10">
                         <div class="text-center md:text-left w-full md:max-w-[65%]">
-                            <h2 id="city-name" class="text-4xl sm:text-6xl font-extrabold tracking-tighter mb-2">Город</h2>
+                            <h2 id="city-name" class="text-4xl sm:text-6xl font-extrabold tracking-tighter mb-2">--</h2>
                             <p id="current-desc" class="text-blue-400 text-xl md:text-2xl font-medium capitalize mb-6"></p>
                             <div class="flex flex-wrap gap-3 justify-center md:justify-start">
                                 <button onclick="toggleAQI()" id="aqi-card" class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5 hover:bg-slate-800 transition-all">
@@ -86,7 +84,7 @@
                                     </div>
                                 </button>
                                 <div class="bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5">
-                                    <span class="text-slate-500 text-[10px] block uppercase font-black mb-1">Облачность</span>
+                                    <span class="text-slate-500 text-[10px] block uppercase font-black mb-1 text-slate-400">Облачность</span>
                                     <span id="clouds" class="font-bold text-lg text-white">--</span><span class="text-xs ml-1 font-bold text-slate-400">%</span>
                                 </div>
                             </div>
@@ -95,30 +93,30 @@
                         <div class="text-center mt-8 md:mt-0">
                             <img id="main-icon" src="" class="w-32 h-32 md:w-44 md:h-44 object-contain mx-auto drop-shadow-2xl">
                             <div id="current-temp" class="text-8xl md:text-9xl font-black leading-none tracking-tighter">--°</div>
-                            <p class="text-slate-400 mt-4 text-xs font-bold uppercase tracking-widest italic">☀️ <span id="sunrise" class="text-white">--</span> | 🌙 <span id="sunset" class="text-white">--</span></p>
+                            <p class="text-slate-400 mt-4 text-xs font-bold uppercase tracking-widest italic">☀️ <span id="sunrise">--</span> | 🌙 <span id="sunset">--</span></p>
                         </div>
                     </div>
                 </div>
 
                 <div class="lg:col-span-4 grid grid-cols-2 gap-4 text-white">
                     <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center items-center">
-                        <span class="text-slate-500 text-[10px] font-black uppercase mb-3">Ветер</span>
+                        <span class="text-slate-500 text-[10px] uppercase mb-3 font-bold">Ветер</span>
                         <div class="flex items-center justify-center gap-2 mb-1">
                             <div id="wind-dir" class="text-2xl text-blue-500 transition-all duration-1000">↑</div>
-                            <span id="wind-dir-text" class="text-lg font-black uppercase tracking-tighter">--</span>
+                            <span id="wind-dir-text" class="text-lg font-black uppercase">--</span>
                         </div>
-                        <div class="text-xl font-bold"><span id="wind">--</span> <span class="text-xs text-slate-500">м/с</span></div>
+                        <div class="text-xl font-black"><span id="wind">--</span> <span class="text-xs text-slate-500 font-normal">м/с</span></div>
                     </div>
-                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                        <span class="text-slate-500 text-[10px] font-black uppercase mb-1 text-slate-500">Давление</span>
+                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center font-bold">
+                        <span class="text-slate-500 text-[10px] uppercase mb-1">Давление</span>
                         <div id="pressure" class="text-2xl font-black">--</div>
                     </div>
-                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                        <span class="text-slate-500 text-[10px] font-black uppercase mb-1 text-slate-500">Влажность</span>
+                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center font-bold">
+                        <span class="text-slate-500 text-[10px] uppercase mb-1">Влажность</span>
                         <div id="humidity" class="text-3xl font-black">--</div>
                     </div>
-                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center">
-                        <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none text-slate-500">Ощущается как</span>
+                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center font-bold">
+                        <span class="text-slate-500 text-[10px] uppercase mb-1 leading-none text-slate-500 font-normal">Ощущается как</span>
                         <div id="feels-like" class="text-3xl font-black mt-1">--°</div>
                     </div>
                 </div>
@@ -174,7 +172,7 @@
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
             } catch (e) {
-                alert("Ошибка сети или города. Попробуйте VPN.");
+                alert("Ошибка загрузки. Попробуйте VPN.");
                 console.error(e);
             }
         }
@@ -191,12 +189,7 @@
                 document.getElementById('aqi-text').className = `text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 ${aqiLevels[main].color}`;
                 document.getElementById('aqi-grid').innerHTML = Object.entries(data.list[0].components)
                     .filter(([k]) => pollutantNames[k])
-                    .map(([k, v]) => `
-                        <div class="flex justify-between items-center bg-white/5 p-2 px-3 rounded-xl border border-white/5">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${pollutantNames[k]}</span>
-                            <span class="text-sm font-black ${getCompColor(k, v)}">${Math.round(v)}</span>
-                        </div>
-                    `).join('');
+                    .map(([k, v]) => `<div class="flex justify-between items-center bg-white/5 p-2 px-3 rounded-xl border border-white/5"><span class="text-[10px] font-bold text-slate-400 uppercase">${pollutantNames[k]}</span><span class="text-sm font-black ${getCompColor(k, v)}">${Math.round(v)}</span></div>`).join('');
             } catch(e) { document.getElementById('aqi-card').classList.add('hidden'); }
         }
 
@@ -229,7 +222,6 @@
                 </div>
             `).join('');
 
-            // Chart
             const dailyData = data.list.filter(item => item.dt_txt.includes("12:00:00"));
             if (chart) chart.destroy();
             chart = new Chart(document.getElementById('tempChart'), {
@@ -241,17 +233,18 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#ffffff' } }, x: { ticks: { color: '#94a3b8' } } } }
             });
 
-            // Map (Lazy Init)
+            // Карта (Статичная)
             if (map) map.remove();
-            map = L.map('map', { zoomControl: false }).setView([city.coord.lat, city.coord.lon], 11);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
-            L.circle([city.coord.lat, city.coord.lon], { color: '#3b82f6', radius: 2000, fillOpacity: 0.1 }).addTo(map);
-            map.on('click', (e) => fetchWeather({ lat: e.latlng.lat, lon: e.latlng.lng }));
+            try {
+                map = L.map('map', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false }).setView([city.coord.lat, city.coord.lon], 11);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { className: 'map-tiles' }).addTo(map);
+                L.circle([city.coord.lat, city.coord.lon], { color: '#3b82f6', radius: 2500, fillOpacity: 0.2, weight: 2 }).addTo(map);
+            } catch(e) { console.warn("Карта заблокирована"); }
 
             document.getElementById('forecast-grid').innerHTML = dailyData.map(day => `
-                <div class="glass p-5 rounded-3xl text-center">
+                <div class="glass p-5 rounded-3xl text-center transition-transform hover:scale-105">
                     <div class="text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-tighter">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div>
-                    <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-12">
+                    <img id="main-icon" src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-12">
                     <div class="text-xl font-black text-white">${Math.round(day.main.temp)}°</div>
                 </div>
             `).join('');
@@ -272,6 +265,4 @@
         }
 
         window.onload = getLocation;
-    </script>
-</body>
-</html>
+    </script
