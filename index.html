@@ -336,4 +336,53 @@
                 </div>
             `).join('');
 
-            const da
+            const dailyData = data.list.filter(item => item.dt_txt.includes("12:00:00"));
+            if (chart) chart.destroy();
+            chart = new Chart(document.getElementById('tempChart'), {
+                type: 'line',
+                data: {
+                    labels: dailyData.map(d => new Date(d.dt * 1000).toLocaleDateString('ru', {weekday: 'short'})),
+                    datasets: [{ 
+                        data: dailyData.map(d => d.main.temp), 
+                        borderColor: '#3b82f6', tension: 0.4, fill: true, 
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)', 
+                        pointRadius: 6, pointBackgroundColor: '#3b82f6', borderWidth: 4 
+                    }]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { ticks: { color: '#64748b', font: { weight: 'bold' } }, grid: { color: 'rgba(255,255,255,0.03)' } }, 
+                        x: { ticks: { color: '#64748b', font: { weight: 'bold' } }, grid: { display: false } } 
+                    } 
+                }
+            });
+
+            document.getElementById('forecast-grid').innerHTML = dailyData.map(day => `
+                <div class="glass p-6 rounded-[2.5rem] text-center transition-all hover:scale-105 hover:bg-white/10">
+                    <div class="text-slate-500 text-[10px] font-black uppercase mb-2 tracking-widest">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div>
+                    <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-14">
+                    <div class="text-2xl font-black text-white mt-2">${Math.round(day.main.temp)}°</div>
+                </div>
+            `).join('');
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    p => fetchWeather({ lat: p.coords.latitude, lon: p.coords.longitude }),
+                    () => fetchWeather("Moscow"), { timeout: 5000 }
+                );
+            } else { fetchWeather("Moscow"); }
+        }
+
+        function searchCity() {
+            const v = document.getElementById('city-input').value.trim();
+            if (v) fetchWeather(v);
+        }
+
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
