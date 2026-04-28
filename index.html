@@ -151,7 +151,14 @@
         let chart;
 
         const aqiLevels = { 1: { text: "Чисто", color: "text-green-400" }, 2: { text: "Норма", color: "text-yellow-400" }, 3: { text: "Средне", color: "text-orange-400" }, 4: { text: "Плохо", color: "text-red-400" }, 5: { text: "Опасно", color: "text-purple-400" } };
-        const pollutantNames = { co: "CO", no2: "NO₂", o3: "O₃", so2: "SO₂", pm2_5: "PM2.5", pm10: "PM10" };
+        const pollutantNames = { 
+            co: "CO (Угарный газ)", 
+            no2: "NO₂ (Выхлопы)", 
+            o3: "O₃ (Смог)", 
+            so2: "SO₂ (Пром.газ)", 
+            pm2_5: "PM2.5 (Мелкая пыль)", 
+            pm10: "PM10 (Крупная пыль)" 
+        };
 
         const getCompColor = (k, v) => {
             const lim = { pm2_5: [10, 25, 50, 75], pm10: [20, 50, 100, 200], no2: [40, 70, 150, 200], o3: [60, 100, 140, 180] };
