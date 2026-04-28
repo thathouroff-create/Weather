@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyCast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #e2e8f0; margin: 0; min-height: 100vh; }
+        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+
+        /* Стили для Skeleton */
+        .skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: shimmer 2s infinite linear; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ЭФФЕКТЫ ПОГОДЫ */
+        #weather-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; border-radius: 2.5rem; }
+
+        /* Дождь */
+        .rain-drop { position: absolute; background: rgba(255,255,255,0.4); width: 2px; height: 15px; top: -20px; animation: rain linear infinite; }
+        @keyframes rain { to { transform: translateY(500px); } }
+
+        /* Снег */
+        .snow-flake { position: absolute; background: white; border-radius: 50%; top: -10px; animation: snow linear infinite; opacity: 0.8; }
+        @keyframes snow { 
+            0% { transform: translateY(0) translateX(0); }
+            25% { translateX(15px); }
+            50% { translateX(-15px); }
+            100% { transform: translateY(500px) translateX(0); } 
+        }
+
+        /* Облака / Туман */
+        .cloud-puff { position: absolute; background: rgba(255,255,255,0.1); filter: blur(40px); border-radius: 50%; animation: drift linear infinite; }
+        @keyframes drift { from { transform: translateX(-150%); } to { transform: translateX(250%); } }
+
+        /* Солнце / Ясно */
+        .sun-glow { position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, transparent 70%); animation: pulse 4s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.3); opacity: 0.8; } }
+
+        /* Гроза */
+        .lightning-flash { animation: flash 5s infinite; }
+        @keyframes flash { 0%, 94%, 98%, 100% { background: transparent; } 95%, 97% { background: rgba(255,255,255,0.2); } }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        #aqi-details { display: grid; grid-template-rows: 0fr; transition: all 0.5s ease; opacity: 0; }
+        #aqi-details.open { grid-template-rows: 1fr; opacity: 1; margin-top: 1rem; }
+    </style>
+</head>
+<body class="pb-12">
+    <div class="container mx-auto p-4 max-w-6xl">
+
+        <header class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 mt-6">
+            <h1 class="text-4xl font-black text-white tracking-tighter uppercase italic">
+                <span class="text-blue-400">Sky</span>Cast
+            </h1>
+            <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                <form onsubmit="event.preventDefault(); searchCity();" class="relative flex-grow md:w-64">
+                    <input type="text" id="city-input" placeholder="Поиск города..." 
+                           class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-3 px-5 pr-14 focus:outline-none focus:border-blue-500 text-white placeholder-slate-500">
+                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-500 w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all active:scale-95 shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </form>
+                <button onclick="getLocation()" class="bg-slate-800 border border-slate-700 px-5 py-3 rounded-2xl text-sm font-bold text-white hover:bg-slate-700 active:scale-95 shadow-md">📍 Мое место</button>
+            </div>
+        </header>
+
+        <div id="loader" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8 h-80 skeleton rounded-[2.5rem]"></div>
+                <div class="lg:col-span-4 grid grid-cols-2 gap-4">
+                    <div class="h-32 skeleton rounded-3xl"></div>
+                    <div class="h-32 skeleton rounded-3xl"></div>
+                    <div class="h-32 skeleton rounded-3xl"></div>
+                    <div class="h-32 skeleton rounded-3xl"></div>
+                </div>
+            </div>
+            <div class="h-64 skeleton rounded-[2.5rem]"></div>
+        </div>
+
+        <main id="main-content" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                <div id="main-card" class="lg:col-span-8 glass p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+                    <div id="weather-bg"></div> <div class="flex flex-col md:flex-row justify-between items-center relative z-10 text-white">
+                        <div class="text-center md:text-left w-full md:max-w-[65%]">
+                            <h2 id="city-name" class="text-4xl sm:text-6xl font-extrabold tracking-tighter mb-2">Город</h2>
+                            <p id="current-desc" class="text-blue-400 text-xl md:text-2xl font-medium capitalize mb-6"></p>
+                            <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                                <button onclick="toggleAQI()" id="aqi-card" class="glass bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5 hover:bg-slate-800 transition-all shadow-sm">
+                                    <span class="text-slate-500 text-[10px] block uppercase font-black mb-1">Воздух (AQI) ▾</span>
+                                    <div class="flex items-center gap-2">
+                                        <span id="aqi-val" class="font-bold text-lg">--</span>
+                                        <span id="aqi-text" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800">--</span>
+                                    </div>
+                                </button>
+                                <div class="glass bg-slate-900/50 px-4 py-3 rounded-2xl border border-white/5 shadow-sm">
+                                    <span class="text-slate-500 text-[10px] block uppercase font-black mb-1">Облачность</span>
+                                    <span id="clouds" class="font-bold text-lg text-white">--</span><span class="text-xs ml-1 font-bold text-slate-400">%</span>
+                                </div>
+                            </div>
+                            <div id="aqi-details"><div class="overflow-hidden"><div id="aqi-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-5 bg-slate-950/60 rounded-3xl border border-blue-500/10"></div></div></div>
+                        </div>
+                        <div class="text-center mt-8 md:mt-0">
+                            <img id="main-icon" src="" class="w-32 h-32 md:w-44 md:h-44 object-contain mx-auto drop-shadow-2xl">
+                            <div id="current-temp" class="text-8xl md:text-9xl font-black leading-none tracking-tighter">--°</div>
+                            <p class="text-slate-400 mt-4 text-xs font-bold uppercase tracking-widest italic">☀️ <span id="sunrise" class="text-white">--</span> | 🌙 <span id="sunset" class="text-white">--</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 grid grid-cols-2 gap-4 text-white">
+                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center items-center shadow-lg">
+                        <span class="text-slate-500 text-[10px] font-black uppercase mb-3">Ветер</span>
+                        <div class="flex items-center justify-center gap-2 mb-1">
+                            <div id="wind-dir" class="text-2xl text-blue-500 transition-all duration-1000">↑</div>
+                            <span id="wind-dir-text" class="text-lg font-black uppercase tracking-tighter">--</span>
+                        </div>
+                        <div class="text-xl font-bold"><span id="wind">--</span> <span class="text-xs text-slate-500">м/с</span></div>
+                    </div>
+                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center shadow-lg">
+                        <span class="text-slate-500 text-[10px] font-black uppercase mb-1">Давление</span>
+                        <div id="pressure" class="text-lg font-black">--</div>
+                    </div>
+                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center shadow-lg">
+                        <span class="text-slate-500 text-[10px] font-black uppercase mb-1">Влажность</span>
+                        <div id="humidity" class="text-3xl font-black">--</div>
+                    </div>
+                    <div class="glass p-6 rounded-3xl text-center flex flex-col justify-center shadow-lg">
+                        <span class="text-slate-500 text-[10px] font-black uppercase mb-1 leading-none">Ощущается как</span>
+                        <div id="feels-like" class="text-3xl font-black mt-1">--°</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="hourly-grid" class="flex gap-4 overflow-x-auto pb-6 mb-8 no-scrollbar scroll-smooth"></div>
+            <div class="glass p-8 rounded-[2.5rem] mb-8 text-white shadow-2xl">
+                <h3 class="text-lg font-bold mb-6">📊 Температурный тренд</h3>
+                <div class="h-[250px] w-full"><canvas id="tempChart"></canvas></div>
+            </div>
+            <div id="forecast-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4 px-2"></div>
+        </main>
+    </div>
+
+    <script>
+        const API_KEY = "604b73696fe82cfda93d7d8278c9faff";
+        let chart;
+
+        const aqiLevels = { 1: { text: "Чисто", color: "text-green-400" }, 2: { text: "Норма", color: "text-yellow-400" }, 3: { text: "Средне", color: "text-orange-400" }, 4: { text: "Плохо", color: "text-red-400" }, 5: { text: "Опасно", color: "text-purple-400" } };
+        const pollutantNames = { 
+            co: "CO (Угарный газ)", 
+            no2: "NO₂ (Выхлопы)", 
+            o3: "O₃ (Смог)", 
+            so2: "SO₂ (Пром.газ)", 
+            pm2_5: "PM2.5 (Мелкая пыль)", 
+            pm10: "PM10 (Крупная пыль)" 
+        };
+
+        const getCompColor = (k, v) => {
+            const lim = { pm2_5: [10, 25, 50, 75], pm10: [20, 50, 100, 200], no2: [40, 70, 150, 200], o3: [60, 100, 140, 180] };
+            if (!lim[k]) return 'text-white';
+            if (v <= lim[k][0]) return 'text-green-400';
+            if (v <= lim[k][1]) return 'text-yellow-400';
+            if (v <= lim[k][2]) return 'text-orange-400';
+            return 'text-red-400';
+        };
+
+        // ЛОГИКА АНИМАЦИИ КАРТОЧКИ
+        function setWeatherEffect(code) {
+            const bg = document.getElementById('weather-bg');
+            const card = document.getElementById('main-card');
+            bg.innerHTML = '';
+            card.classList.remove('lightning-flash');
+
+            if (code >= 200 && code < 300) { // Гроза
+                card.classList.add('lightning-flash');
+                createParticles(bg, 'rain-drop', 30);
+            } else if (code >= 300 && code < 600) { // Дождь
+                createParticles(bg, 'rain-drop', 60);
+            } else if (code >= 600 && code < 700) { // Снег
+                createParticles(bg, 'snow-flake', 40);
+            } else if (code >= 700 && code < 800 || code > 800) { // Туман или Облака
+                createParticles(bg, 'cloud-puff', 5);
+            } else if (code === 800) { // Ясно
+                const sun = document.createElement('div');
+                sun.className = 'sun-glow';
+                bg.appendChild(sun);
+            }
+        }
+
+        function createParticles(container, className, count) {
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = className;
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (Math.random() * 1 + 0.5) + 's';
+                p.style.animationDelay = Math.random() * 2 + 's';
+                if (className === 'snow-flake') {
+                    const size = Math.random() * 5 + 2 + 'px';
+                    p.style.width = size; p.style.height = size;
+                    p.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                }
+                if (className === 'cloud-puff') {
+                    p.style.width = Math.random() * 200 + 100 + 'px';
+                    p.style.height = p.style.width;
+                    p.style.top = Math.random() * 100 + '%';
+                    p.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                }
+                container.appendChild(p);
+            }
+        }
+
+        const toggleAQI = () => document.getElementById('aqi-details').classList.toggle('open');
+
+        async function fetchWeather(query) {
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('main-content').classList.add('hidden');
+            try {
+                let url = typeof query === 'string' 
+                    ? `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(query)}&appid=${API_KEY}&units=metric&lang=ru`
+                    : `https://api.openweathermap.org/data/2.5/forecast?lat=${query.lat}&lon=${query.lon}&appid=${API_KEY}&units=metric&lang=ru`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.cod !== "200") throw new Error(data.message);
+                updateUI(data);
+                fetchAQI(data.city.coord.lat, data.city.coord.lon);
+                setWeatherEffect(data.list[0].weather[0].id); // Запуск эффектов
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            } catch (e) {
+                alert("Ошибка: " + e.message + ". Проверьте VPN.");
+                document.getElementById('city-name').innerText = "Ошибка";
+            }
+        }
+
+        async function fetchAQI(lat, lon) {
+            try {
+                const res = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
+                const data = await res.json();
+                const card = document.getElementById('aqi-card');
+                card.classList.remove('hidden');
+                const main = data.list[0].main.aqi;
+                document.getElementById('aqi-val').innerText = main;
+                document.getElementById('aqi-text').innerText = aqiLevels[main].text;
+                document.getElementById('aqi-text').className = `text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-800 ${aqiLevels[main].color}`;
+                document.getElementById('aqi-grid').innerHTML = Object.entries(data.list[0].components)
+                    .filter(([k]) => pollutantNames[k])
+                    .map(([k, v]) => `<div class="flex justify-between items-center bg-white/5 p-2 px-3 rounded-xl border border-white/5"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${pollutantNames[k]}</span><span class="text-sm font-black ${getCompColor(k, v)}">${Math.round(v)}</span></div>`).join('');
+            } catch(e) { document.getElementById('aqi-card').classList.add('hidden'); }
+        }
+
+        function updateUI(data) {
+            const cur = data.list[0];
+            const city = data.city;
+            document.getElementById('city-name').innerText = city.name;
+            document.getElementById('current-temp').innerText = `${Math.round(cur.main.temp)}°`;
+            document.getElementById('current-desc').innerText = cur.weather[0].description;
+            document.getElementById('main-icon').src = `https://openweathermap.org/img/wn/${cur.weather[0].icon}@4x.png`;
+            document.getElementById('feels-like').innerText = `${Math.round(cur.main.feels_like)}°`;
+            document.getElementById('clouds').innerText = cur.clouds.all;
+            document.getElementById('humidity').innerText = cur.main.humidity + '%';
+            document.getElementById('pressure').innerText = Math.round(cur.main.pressure * 0.75006) + ' мм рт. ст.';
+            document.getElementById('wind').innerText = Math.round(cur.wind.speed);
+            document.getElementById('wind-dir').style.transform = `rotate(${cur.wind.deg}deg)`;
+            document.getElementById('wind-dir-text').innerText = ['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'][Math.round(cur.wind.deg/45)%8];
+            const formatTime = (ts) => new Date(ts * 1000).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('sunrise').innerText = formatTime(city.sunrise);
+            document.getElementById('sunset').innerText = formatTime(city.sunset);
+            document.getElementById('hourly-grid').innerHTML = data.list.slice(0, 12).map(h => `<div class="glass min-w-[110px] p-4 rounded-3xl text-center border-white/5"><div class="text-slate-500 text-[10px] mb-1 font-bold uppercase">${h.dt_txt.split(' ')[1].substring(0, 5)}</div><img src="https://openweathermap.org/img/wn/${h.weather[0].icon}.png" class="mx-auto w-10"><div class="text-lg font-black text-white">${Math.round(h.main.temp)}°</div></div>`).join('');
+            const dailyData = data.list.filter(item => item.dt_txt.includes("12:00:00"));
+            if (chart) chart.destroy();
+            chart = new Chart(document.getElementById('tempChart'), {
+                type: 'line',
+                data: {
+                    labels: dailyData.map(d => new Date(d.dt * 1000).toLocaleDateString('ru', {weekday: 'short'})),
+                    datasets: [{ data: dailyData.map(d => d.main.temp), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)', pointRadius: 5, borderWidth: 3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#ffffff' } }, x: { ticks: { color: '#94a3b8' } } } }
+            });
+            document.getElementById('forecast-grid').innerHTML = dailyData.map(day => `<div class="glass p-5 rounded-3xl text-center"><div class="text-slate-500 text-[10px] font-bold uppercase mb-1 tracking-tighter">${new Date(day.dt * 1000).toLocaleDateString('ru', {day: 'numeric', month: 'short'})}</div><img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" class="mx-auto w-12"><div class="text-xl font-black text-white">${Math.round(day.main.temp)}°</div></div>`).join('');
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    p => fetchWeather({ lat: p.coords.latitude, lon: p.coords.longitude }),
+                    () => fetchWeather("Moscow"), { timeout: 5000 }
+                );
+            } else { fetchWeather("Moscow"); }
+        }
+
+        function searchCity() {
+            const v = document.getElementById('city-input').value.trim();
+            if (v) fetchWeather(v);
+        }
+
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
